@@ -1,0 +1,173 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 90%;
+    text-align: center;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 2.5em;
+}
+
+#quiz-info {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1.2em;
+}
+
+#question {
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 1.4em;
+}
+
+.option {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.option:hover {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.option.selected {
+    background: #2196f3;
+    color: white;
+    border-color: #1976d2;
+}
+
+#quiz-controls {
+    margin-top: 2rem;
+}
+
+button {
+    background: #2196f3;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.1em;
+    margin: 0 10px;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: #1976d2;
+}
+
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+#start-screen, #result-screen {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+#start-quiz, #restart-quiz {
+    display: block;
+    margin: 0 auto 1rem;
+}
+
+#score {
+    font-size: 1.5em;
+    color: #333;
+    margin: 1rem 0;
+}
+
+.question {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 15px;
+    border-left: 5px solid #2196f3;
+}
+
+.question h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.3em;
+}
+
+.options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.option {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+#progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    margin: 2rem 0;
+    overflow: hidden;
+}
+
+#progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+#live-score {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #2196f3;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 1.5rem;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    .question {
+        padding: 1rem;
+    }
+}

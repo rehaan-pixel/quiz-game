@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 50%, #0d9488 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+        }
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20px 30px, white 1px, transparent 1px),
+                radial-gradient(circle at 40px 70px, white 1.5px, transparent 1.5px),
+                radial-gradient(circle at 90px 40px, white 0.8px, transparent 0.8px);
+            background-size: 100px 100px, 150px 120px, 80px 90px;
+            animation: diagonalFloat 20s linear infinite;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        body::after {
+            animation-direction: reverse;
+            animation-duration: 25s;
+            opacity: 0.08;
+        }
+        @keyframes diagonalFloat {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 25px 50px rgba(20, 184, 166, 0.3);
+            max-width: 650px;
+            width: 100%;
+            text-align: center;
+            transform: scale(0.95);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .container:hover {
+            transform: scale(1);
+        }
+        h1 {
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+            font-size: 2.3em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        #question {
+            color: #1e293b;
+            margin-bottom: 2rem;
+            font-size: 1.5em;
+            line-height: 1.4;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .option {
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid rgba(20, 184, 166, 0.3);
+            border-radius: 18px;
+            padding: 1.2rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-align: left;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(20, 184, 166, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .option:active::before {
+            width: 300px;
+            height: 300px;
+        }
+        .option:hover:not(.correct):not(.wrong) {
+            transform: translateY(-4px) scale(1.02);
+            border-color: #14b8a6;
+            box-shadow: 0 12px 30px rgba(20, 184, 166, 0.4);
+        }
+        .option.selected {
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            color: white;
+            border-color: #0f766e;
+            box-shadow: 0 8px 25px rgba(20, 184, 166, 0.5);
+        }
+        .option.correct {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            color: white;
+            border-color: #047857;
+            animation: bounce 0.6s ease-out;
+        }
+        .option.wrong {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: white;
+            border-color: #b91c1c;
+            animation: shake 0.5s ease-out;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button {
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(20, 184, 166, 0.4);
+        }
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(20, 184, 166, 0.6);
+        }
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        #score {
+            font-size: 2.2em;
+            font-weight: 800;
+            margin: 1.5rem 0;
+            background: linear-gradient(135deg, #14b8a6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .hidden { display: none !important; }
+        #progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+        #progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+        .confetti {
+            position: fixed;
+            top: -10px;
+            left: 0;
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            animation: confetti-fall 3s linear infinite;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        @keyframes confetti-fall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 2rem; margin: 1rem; }
+            h1 { font-size: 1.8em; }
+            .option { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 General Knowledge Challenge</h1>
+        <div id="progress"><div id="progress-fill"></div></div>
+        
+        <div id="quiz">
+            <div id="question"></div>
+            <div id="options" class="options"></div>
+            <div class="controls">
+                <button id="prev" class="hidden">← Previous</button>
+                <button id="next">Next</button>
+            </div>
+        </div>
+        
+        <div id="results" class="hidden">
+            <div id="score">🎉 Final Score</div>
+            <button id="restart">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Simplified Quiz App - 7 Questions
+        const refs = {
+            quiz: document.getElementById('quiz'),
+            results: document.getElementById('results'),
+            question: document.getElementById('question'),
+            options: document.getElementById('options'),
+            prev: document.getElementById('prev'),
+            next: document.getElementById('next'),
+            restart: document.getElementById('restart'),
+            score: document.getElementById('score'),
+            progress: document.getElementById('progress-fill')
+        };
+
+        let quizData = [], current = 0, answers = [], showResults = false;
+
+        const API_URL = '/api/questions';
+
+        // Init
+        async function init() {
+            try {
+                const res = await fetch(API_URL);
+                if (res.ok) quizData = await res.json();
+            } catch {
+                quizData = [ // 7 General Knowledge Questions (Fallback)
+                    {question: "What is the capital of France?", options:["Berlin", "Madrid", "Paris", "Rome"], correct:2},
+                    {question: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter", "Saturn"], correct:1},
+                    {question: "What is 2 + 2?", options: ["3", "4", "5", "6"], correct:1},
+                    {question: "How many continents are there on Earth?", options: ["5", "6", "7", "8"], correct:2},
+                    {question: "What is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], correct:3},
+                    {question: "Nearest star to Earth (after Sun)?", options: ["Betelgeuse", "Proxima Centauri", "Sirius", "Rigel"], correct:1},
+                    {question: "Largest mammal on Earth?", options: ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"], correct:1}
+                ];
+            }
+            answers = new Array(quizData.length).fill(null);
+            showQuiz();
+        }
+
+        function showQuiz() {
+            refs.results.classList.add('hidden');
+            refs.quiz.classList.remove('hidden');
+            showCurrent();
+        }
+
+        function showCurrent() {
+            const q = quizData[current];
+            refs.question.textContent = `${current+1}/${quizData.length}. ${q.question}`;
+            refs.options.innerHTML = q.options.map((opt,i) => 
+                `<div class="option" onclick="select(${i})">${opt}</div>`
+            ).join('');
+            updateUI();
+        }
+
+        window.select = function(i) {
+            if (showResults) return;
+            answers[current] = i;
+            updateUI();
+        }
+
+        function updateUI() {
+            const sel = answers[current], corr = quizData[current].correct;
+            document.querySelectorAll('.option').forEach((el,i) => {
+                el.className = 'option';
+                if (showResults) {
+                    if (i === corr) el.classList.add('correct');
+                    else if (i === sel && sel !== corr) el.classList.add('wrong');
+                } else if (i === sel) el.classList.add('selected');
+            });
+            refs.prev.classList.toggle('hidden', current === 0);
+            refs.next.disabled = answers[current] === null;
+            refs.next.textContent = current === quizData.length-1 ? '🎯 Finish' : 'Next →';
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const done = answers.filter(Boolean).length;
+            refs.progress.style.width = `${(done/quizData.length)*100}%`;
+        }
+
+        function next() {
+            if (current < quizData.length-1) {
+                current++;
+                showCurrent();
+            } else finish();
+        }
+
+        function prev() { 
+            if (current > 0) {
+                current--;
+                showCurrent();
+            }
+        }
+
+        async function finish() {
+            showResults = true;
+            updateUI();
+            setTimeout(calcScore, 1500);
+        }
+
+        async function calcScore() {
+            let score = answers.filter((a,i) => a === quizData[i].correct).length;
+            refs.score.textContent = `🎉 ${score}/${quizData.length}`;
+            confetti();
+            
+            const name = prompt('🏆 Enter name for leaderboard:') || 'Anonymous';
+            if (name && name !== 'Anonymous') {
+                try {
+                    await fetch('/api/scores', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({name, score, total: quizData.length})
+                    });
+                } catch {}
+            }
+            
+            refs.quiz.classList.add('hidden');
+            refs.results.classList.remove('hidden');
+        }
+
+        function confetti() {
+            for (let i=0; i<50; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                el.style.left = Math.random()*100 + '%';
+                el.style.background = ['#10b981','#14b8a6','#3b82f6','#ef4444'][Math.floor(Math.random()*4)];
+                el.style.animationDelay = Math.random()*1 + 's';
+                el.style.animationDuration = (Math.random()*1 + 2) + 's';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 4000);
+            }
+        }
+
+        // Events
+        refs.prev.onclick = prev;
+        refs.next.onclick = () => !refs.next.disabled && next();
+        refs.restart.onclick = init;
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
