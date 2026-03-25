@@ -2,11 +2,20 @@
 
 ## 🎯 Quick Start
 ```
-cd "c:/Users/Rehaan/Downloads/Simple quiz/backend"
+# Backend (recommended - API + scores)
+cd backend
 npm install
 npm start
 ```
-→ **http://localhost:3000** (server serves frontend + API)
+→ Open **http://localhost:3000**
+
+**OR Frontend-only (offline fallback)**
+```
+# Just open in browser (uses 7 hardcoded questions)
+index.html
+```
+
+**✅ Backend auto-inits DB** (`backend/quiz.db`)
 
 **✅ Backend running** - DB auto-init (`backend/quiz.db`)
 

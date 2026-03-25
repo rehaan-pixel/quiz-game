@@ -275,24 +275,48 @@
 
         const API_URL = '/api/questions';
 
-        // Init
+// Init - FIXED with robust fallback + logging
         async function init() {
+            console.log('🌟 Quiz init started...');
+            
+            // Try API first
             try {
+                console.log('🔄 Fetching from', API_URL);
                 const res = await fetch(API_URL);
-                if (res.ok) quizData = await res.json();
-            } catch {
-                quizData = [ // 7 General Knowledge Questions (Fallback)
-                    {question: "What is the capital of France?", options:["Berlin", "Madrid", "Paris", "Rome"], correct:2},
-                    {question: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter", "Saturn"], correct:1},
-                    {question: "What is 2 + 2?", options: ["3", "4", "5", "6"], correct:1},
-                    {question: "How many continents are there on Earth?", options: ["5", "6", "7", "8"], correct:2},
-                    {question: "What is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], correct:3},
-                    {question: "Nearest star to Earth (after Sun)?", options: ["Betelgeuse", "Proxima Centauri", "Sirius", "Rigel"], correct:1},
-                    {question: "Largest mammal on Earth?", options: ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"], correct:1}
-                ];
+                if (res.ok) {
+                    const apiData = await res.json();
+                    console.log('✅ API success:', apiData.length, 'questions');
+                    quizData = apiData;
+                } else {
+                    console.error('❌ API failed:', res.status);
+                    useFallback();
+                }
+            } catch (err) {
+                console.error('❌ Fetch error:', err);
+                useFallback();
             }
+            
+            if (quizData.length === 0) {
+                console.error('⚠️ No questions loaded, forcing fallback');
+                useFallback();
+            }
+            
+            console.log('📋 Loaded', quizData.length, 'questions');
             answers = new Array(quizData.length).fill(null);
             showQuiz();
+        }
+
+        function useFallback() {
+            quizData = [ // ROBUST 7 General Knowledge Questions (0-indexed correct)
+                {question: "What is the capital of France?", options:["Berlin", "Madrid", "Paris", "Rome"], correct:2},
+                {question: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter", "Saturn"], correct:1},
+                {question: "Largest star in our solar system?", options: ["Rigel", "Sun", "Betelgeuse", "Sirius"], correct:1},
+                {question: "How many continents are there on Earth?", options: ["5", "6", "7", "8"], correct:2},
+                {question: "What is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], correct:3},
+                {question: "Nearest star to our solar system (after Sun)?", options: ["Betelgeuse", "Proxima Centauri", "Sirius", "Rigel"], correct:1},
+                {question: "Largest mammal on Earth?", options: ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"], correct:1}
+            ];
+            console.log('🔧 Using offline fallback:', quizData.length, 'questions');
         }
 
         function showQuiz() {
@@ -302,7 +326,14 @@
         }
 
         function showCurrent() {
+            if (!quizData || quizData.length === 0 || !quizData[current]) {
+                refs.question.textContent = '❌ Error: No questions available. Please refresh or start backend.';
+                refs.options.innerHTML = '<div class="option" style="background:#fee2e2;color:#dc2626;">Run backend: cd backend && npm start</div>';
+                refs.next.disabled = true;
+                return;
+            }
             const q = quizData[current];
+            console.log('Showing Q', current+1, q.question);
             refs.question.textContent = `${current+1}/${quizData.length}. ${q.question}`;
             refs.options.innerHTML = q.options.map((opt,i) => 
                 `<div class="option" onclick="select(${i})">${opt}</div>`
