@@ -1,16 +1,23 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { initDB, getQuestions, addScore, getScores } = require('./database.js');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..'))); // Serve frontend
 
-initDB();
+initDB((err) => {
+  if (err) {
+    console.error('Failed to initialize DB:', err);
+    process.exit(1);
+  }
+  console.log('✅ Database connected and ready!');
+});
 
 // API Routes
 app.get('/api/questions', (req, res) => {

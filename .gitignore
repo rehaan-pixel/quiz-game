@@ -1,6 +1,3 @@
-node_modules/
-backend/node_modules/
-backend/quiz.db
-.DS_Store
-*.log
+node_modules/\nbackend/node_modules/\nbackend/quiz.db\n.DS_Store\n*.log\nbackend/.env
 
+DS_Store

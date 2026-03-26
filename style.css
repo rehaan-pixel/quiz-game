@@ -50,6 +50,8 @@ h1 {
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: left;
+    color: #333;
+    font-size: 1.1em;
 }
 
 .option:hover {

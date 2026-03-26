@@ -1,147 +1,183 @@
-// Simple Quiz Data - Beginner friendly questions
-const quizData = [
-    {
-        question: "What does HTML stand for?",
-        options: ["Hyper Text Markup Language", "Home Tool Markup Language", "Hyperlinks and Text Markup Language", "Hyper Text Making Language"],
-        correct: 0
-    },
-    {
-        question: "Which HTML tag is used for the largest heading?",
-        options: ["<h1>", "<h6>", "<heading>", "<head>"],
-        correct: 0
-    },
-    {
-        question: "What does CSS stand for?",
-        options: ["Creative Style Sheets", "Colorful Style Sheets", "Cascading Style Sheets", "Computer Style Sheets"],
-        correct: 2
-    },
-    {
-        question: "Which CSS property controls the text size?",
-        options: ["text-size", "font-style", "text-size", "font-size"],
-        correct: 3
-    },
-    {
-        question: "JavaScript files have the extension:",
-        options: [".js", ".javascript", ".jvs", ".jscript"],
-        correct: 0
-    }
-];
-
-let currentQuestion = 0;
+let quizData = [];
 let score = 0;
-let answers = new Array(quizData.length).fill(null);
+let answers = [];
+let nameInput = null;
+let currentQuestion = 0;
+let navContainer = null;
 
 const quizContainer = document.getElementById('quiz-container');
 const startScreen = document.getElementById('start-screen');
 const resultScreen = document.getElementById('result-screen');
 const allQuestionsEl = document.getElementById('all-questions');
-
 const progressFillEl = document.getElementById('progress-fill');
 const submitBtn = document.getElementById('submit-quiz');
-const prevBtn = document.getElementById('prev-btn');
-const nextBtn = document.getElementById('next-btn');
 const startQuizBtn = document.getElementById('start-quiz');
 const restartQuizBtn = document.getElementById('restart-quiz');
 const scoreEl = document.getElementById('score');
+const nameEl = document.getElementById('player-name');
+const leaderboardList = document.getElementById('leaderboard-list');
 
-// Start Quiz
-startQuizBtn.addEventListener('click', startQuiz);
-
-function startQuiz() {
-    startScreen.style.display = 'none';
-    quizContainer.style.display = 'block';
-    score = 0;
-    answers = new Array(quizData.length).fill(null);
-    showAllQuestions();
-    prevBtn.style.display = 'none';
-    nextBtn.style.display = 'none';
-    submitBtn.style.display = 'none';
+async function loadQuizData() {
+  try {
+    const response = await fetch('/api/questions');
+    let data = await response.json();
+    // Use backend {options: [...], correct: "option3"}
+    quizData = data.map(row => ({
+      question: row.question,
+      options: row.options || [row.option1, row.option2, row.option3, row.option4],
+      correct: parseInt(row.correct.charAt(row.correct.length - 1)) - 1
+    }));
+    console.log('Loaded & converted', quizData.length, 'questions, options:', quizData[0].options?.length);
+  } catch (err) {
+    console.error('Backend failed, using fallback');
+    quizData = [
+      {question: "What is 2 + 2?", options: ["3", "4", "5", "6"], correct: 1},
+      {question: "Capital of France?", options: ["Berlin", "Madrid", "Paris", "Rome"], correct: 2},
+      {question: "Red Planet?", options: ["Venus", "Mars", "Jupiter", "Saturn"], correct: 1},
+      {question: "Largest ocean?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], correct: 3},
+      {question: "Romeo and Juliet author?", options: ["Dickens", "Shakespeare", "Austen", "Twain"], correct: 1}
+    ];
+  }
 }
 
-// Show All Questions - Single Page
-function showAllQuestions() {
-    allQuestionsEl.innerHTML = '';
-    
-    quizData.forEach((q, qIndex) => {
-        const questionDiv = document.createElement('div');
-        questionDiv.classList.add('question');
-        
-        const questionTitle = document.createElement('h3');
-        questionTitle.textContent = `Question ${qIndex + 1}: ${q.question}`;
-        questionDiv.appendChild(questionTitle);
-        
-        const optionsDiv = document.createElement('div');
-        optionsDiv.classList.add('options-group');
-        
-        q.options.forEach((option, optIndex) => {
-            const optDiv = document.createElement('div');
-            optDiv.textContent = option;
-            optDiv.classList.add('option');
-            optDiv.addEventListener('click', (e) => selectOption(qIndex, optIndex, optDiv));
-            optionsDiv.appendChild(optDiv);
-        });
-        
-        questionDiv.appendChild(optionsDiv);
-        allQuestionsEl.appendChild(questionDiv);
-    });
-}
-
-// Select Option
-function selectOption(qIndex, optIndex, optEl) {
-    // Remove previous selection for this question
-    const questionOptions = optEl.parentNode.querySelectorAll('.option');
-    questionOptions.forEach(opt => opt.classList.remove('selected'));
-    
-    // Select this option
-    optEl.classList.add('selected');
-    
-    // Save answer
-    answers[qIndex] = optIndex;
-    
-    const answeredCount = answers.filter(a => a !== null).length;
-    if (answeredCount === quizData.length) {
-        submitBtn.style.display = 'inline-block';
+function createNavigation() {
+  if (navContainer) navContainer.remove();
+  
+  navContainer = document.createElement('div');
+  navContainer.id = 'nav-container';
+  navContainer.style.cssText = 'margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;';
+  
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = 'Previous';
+  prevBtn.onclick = () => {
+    if (currentQuestion > 0) {
+      currentQuestion--;
+      showCurrentQuestion();
     }
-}
-
-
-
-// Update Progress
-function updateProgress() {
-    const answeredCount = answers.filter(a => a !== null).length;
-    const progressPercent = (answeredCount / quizData.length) * 100;
-    progressFillEl.style.width = progressPercent + '%';
-}
-
-// Submit Quiz
-submitBtn.addEventListener('click', () => {
-    const unanswered = answers.some(a => a === null);
-    if (unanswered) {
-        alert('Please answer all questions!');
-        return;
+  };
+  prevBtn.style.display = 'none';
+  
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Next';
+  nextBtn.onclick = () => {
+    if (currentQuestion < quizData.length - 1) {
+      currentQuestion++;
+    } else if (answers.every(a => a !== null)) {
+      showResults();
+      return;
     }
-    showResults();
+    showCurrentQuestion();
+  };
+  
+  navContainer.appendChild(prevBtn);
+  navContainer.appendChild(nextBtn);
+  quizContainer.appendChild(navContainer);
+}
+
+startQuizBtn.addEventListener('click', async () => {
+  nameInput = nameEl.value.trim() || 'Anonymous';
+  if (!nameInput) return alert('Enter name for leaderboard!');
+  
+  await loadQuizData();
+  if (quizData.length === 0) return alert('No questions loaded!');
+  
+  answers = new Array(quizData.length).fill(null);
+  currentQuestion = 0;
+  
+  startScreen.style.display = 'none';
+  quizContainer.style.display = 'block';
+  submitBtn.style.display = 'none';
+  
+  showCurrentQuestion();
+  createNavigation();
+  updateProgress();
 });
 
-// Show Results
-function showResults() {
-    quizContainer.style.display = 'none';
-    resultScreen.style.display = 'block';
-    
-    // Calculate score
-    score = 0;
-    answers.forEach((answer, index) => {
-        if (answer === quizData[index].correct) {
-            score++;
-        }
-    });
-    
-    const percentage = Math.round((score / quizData.length) * 100);
-    scoreEl.innerHTML = `You scored <strong>${score}/${quizData.length}</strong> (${percentage}%)`;
+function showCurrentQuestion() {
+  allQuestionsEl.innerHTML = '';
+  
+  const q = quizData[currentQuestion];
+  const questionDiv = document.createElement('div');
+  questionDiv.classList.add('question');
+  
+  const title = document.createElement('h3');
+  title.textContent = `Question ${currentQuestion + 1} of ${quizData.length}: ${q.question}`;
+  questionDiv.appendChild(title);
+  
+  const optionsDiv = document.createElement('div');
+  optionsDiv.classList.add('options-group');
+  
+  q.options.forEach((option, index) => {
+    const opt = document.createElement('div');
+    opt.className = 'option' + (answers[currentQuestion] === index ? ' selected' : '');
+    opt.textContent = option;
+    opt.onclick = () => {
+      answers[currentQuestion] = index;
+      showCurrentQuestion();
+    };
+    optionsDiv.appendChild(opt);
+  });
+  
+  questionDiv.appendChild(optionsDiv);
+  allQuestionsEl.appendChild(questionDiv);
+  
+  // Update buttons
+  if (navContainer && navContainer.children[0]) {
+    navContainer.children[0].style.display = currentQuestion > 0 ? 'inline-block' : 'none';
+  }
+  if (navContainer && navContainer.children[1]) {
+    navContainer.children[1].textContent = currentQuestion === quizData.length - 1 ? 'Finish Quiz' : 'Next';
+  }
 }
 
-// Restart Quiz
+function updateProgress() {
+  const answered = answers.filter(x => x !== null).length;
+  progressFillEl.style.width = (answered / quizData.length * 100) + '%';
+}
+
+async function showResults() {
+  if (navContainer) navContainer.style.display = 'none';
+  quizContainer.style.display = 'none';
+  resultScreen.style.display = 'block';
+  
+  score = 0;
+  answers.forEach((ans, i) => {
+    if (ans === quizData[i].correct) score++;
+  });
+  
+  scoreEl.innerHTML = `You scored <strong>${score}/${quizData.length}</strong> (${Math.round(score/quizData.length*100)}%)`;
+  
+  // Save score
+  try {
+    await fetch('/api/scores', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name: nameInput, score, total: quizData.length })
+    });
+  } catch(e) { console.error('Save error'); }
+  
+  // Leaderboard  
+  try {
+    const res = await fetch('/api/scores');
+    const scores = await res.json();
+    leaderboardList.innerHTML = scores.slice(0,10).map((s,i) => 
+      `<div class="leaderboard-item">
+        <span>${i+1}. ${s.name}</span>
+        <span>${s.score}/${s.total}</span>
+      </div>`
+    ).join('') || 'No scores yet';
+  } catch(e) { leaderboardList.innerHTML = 'Loading...'; }
+}
+
 restartQuizBtn.addEventListener('click', () => {
-    resultScreen.style.display = 'none';
-    startScreen.style.display = 'block';
+  resultScreen.style.display = 'none';
+  startScreen.style.display = 'block';
+  quizContainer.style.display = 'none';
+  if (navContainer) navContainer.remove();
+  nameEl.value = '';
+  quizData = [];
+  answers = [];
+  currentQuestion = 0;
+  scoreEl.innerHTML = 'Calculating...';
+  leaderboardList.innerHTML = 'Loading scores...';
 });

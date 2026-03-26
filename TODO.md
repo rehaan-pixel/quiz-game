@@ -1,41 +1,16 @@
-# Quiz Fix Plan - Progress Tracker
+# Simple Quiz - Options Fix TODO
 
-## Approved Plan Steps:
-✅ **1. Create TODO.md** - Tracking progress
+**Current Status:**
+- Backend: MySQL data good (7 questions with options).
+- Bug: script.js wrong mapping row.options → fixed below.
+- Plan approved.
 
-✅ **2. Fix index.html** 
-- Robust fallback + logging
-- Error UI + safety checks
-- Updated questions (star theme)
+**Steps:**
+✅ 1. Breakdown approved plan into TODO.md
 
-**3. Update README.md**
-- Clear backend/frontend run instructions
-- `cd backend && npm i && npm start`
+⭕ 2. Edit script.js to use row.options array + parse correct index
 
-**4. Test & Verify**
-```
-cd backend
-npm install
-npm start
-```
-Visit http://localhost:3000
+⭕ 3. Test in browser: Refresh, start quiz → 4 options visible/clickable
 
-**5. Backend deps check** (if needed)
-```
-cd backend && npm ci
-```
+⭕ 4. Complete!
 
-✅ **3. README.md updated** - Clear instructions
-
-**4. Test & Verify** (Next)
-```
-cd backend
-npm install
-npm start
-```
-Visit http://localhost:3000
-
-**Status:** Frontend fixed! Ready to test 🚀
-
----
-*Backend not running → API fail → broken fallback causing empty UI*
