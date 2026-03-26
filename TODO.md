@@ -1,16 +1,9 @@
-# Simple Quiz - Options Fix TODO
+# GitHub Connection Task
 
-**Current Status:**
-- Backend: MySQL data good (7 questions with options).
-- Bug: script.js wrong mapping row.options → fixed below.
-- Plan approved.
-
-**Steps:**
-✅ 1. Breakdown approved plan into TODO.md
-
-⭕ 2. Edit script.js to use row.options array + parse correct index
-
-⭕ 3. Test in browser: Refresh, start quiz → 4 options visible/clickable
-
-⭕ 4. Complete!
-
+## Steps:
+- [x] Confirm plan and create TODO.md
+- [ ] Clean staging area (unstage node_modules, .env)
+- [ ] Verify git status
+- [ ] Commit staged changes
+- [ ] Push to GitHub origin blackboxai/options-fix
+- [ ] (Optional) Create PR via gh
